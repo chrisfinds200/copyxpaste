@@ -38,7 +38,7 @@ void tcp_connection::handle_read() {
             }
 
             std::cout << "bytes received: " << bytes_transferred << std::endl;
-            self->connection_pool_.fanout_data(self->readbuf_.data());
+            self->connection_pool_.fanout_data(self->readbuf_.data(), self);
 
             // Re-arm read
             self->handle_read();

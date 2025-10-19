@@ -8,7 +8,6 @@
 #include <set>
 
 #include "tcp_connection.h"
-#include "asio/io_context.hpp"
 #include "asio/steady_timer.hpp"
 
 class tcp_connection;
@@ -19,7 +18,7 @@ public:
     void join(const std::shared_ptr<tcp_connection>& connection);
     void disconnect_all();
     void disconnect(const std::shared_ptr<tcp_connection>& connection);
-    void fanout_data(const std::string& data) const;
+    void fanout_data(const std::string& data, const std::shared_ptr<tcp_connection>& invoker) const;
     void poll_clipboard();
     void stop_poll_clipboard();
     std::set<std::shared_ptr<tcp_connection>>& get_connections() {return connections_;}

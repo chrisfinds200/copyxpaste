@@ -32,8 +32,9 @@ void connection_pool::disconnect(const std::shared_ptr<tcp_connection>& connecti
     connections_.erase(connection);
 }
 
-void connection_pool::fanout_data(const std::string& data) const {
+void connection_pool::fanout_data(const std::string& data, const std::shared_ptr<tcp_connection>& invoker) const {
     for (const auto& connection : connections_) {
+        if (connection == invoker) continue;
         connection->handle_write(data);
     }
 }
@@ -47,7 +48,7 @@ void connection_pool::poll_clipboard() {
 
         // fan out
         if (!connections_.empty()) {
-            fanout_data(clip);
+            this->fanout_data(clip, nullptr);
         }
 
     }
