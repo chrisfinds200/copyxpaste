@@ -1,0 +1,10 @@
+.idea
+.idea/dictionaries/
+.idea/vcs.xml
+
+./include/clip/.github
+./include/clip/examples
+./include/clip/tests
+
+.DS_Store
+./include/.DS_Store
