@@ -71,23 +71,42 @@ void cxp_client::disconnect() {
 }
 
 void cxp_client::read_data() {
-    socket_.async_read_some(asio::buffer(readbuf_),
-        [this](const std::error_code& ec, const std::size_t bytes_transferred) {
+    auto self = shared_from_this();
+    asio::async_read(socket_, asio::buffer(readbuf_.data(), clip_message::header_length),
+        [self, this](const std::error_code& ec, const std::size_t bytes_transferred) {
             if (ec) {
                 std::cerr << ec.message() << std::endl;
                 return;
             }
 
-            // Print what we got
-            std::cout.write(readbuf_.data(), static_cast<std::streamsize>(bytes_transferred));
-            std::cout << std::endl;
+            if (readbuf_.decode_header()) {
+                self->read_body();
+            }
+        });
+}
+
+void cxp_client::read_body() {
+    auto self = shared_from_this();
+    asio::async_read(socket_, asio::buffer(readbuf_.data(), readbuf_.body_length()),
+        [self, this](const std::error_code& ec, const std::size_t bytes_transferred) {
+            if (ec) {
+                std::cerr << ec.message() << std::endl;
+                return;
+            }
+
+            // Set clipboard
+            cxp_engine::set_clipboard(readbuf_.data());
             std::cout << "bytes received: " << bytes_transferred << std::endl;
             std::cout.flush();
 
+            // Flush read buffer
+            this->readbuf_ = {};
+
             // Re-arm read
-            read_data();
+            self->read_data();
         });
 }
+
 
 void cxp_client::start_poll() {
     poll_.expires_after(std::chrono::milliseconds(500));

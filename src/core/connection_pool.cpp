@@ -20,7 +20,7 @@ void connection_pool::join(const std::shared_ptr<tcp_connection>& connection) {
 }
 
 void connection_pool::disconnect_all() {
-    const std::vector<std::shared_ptr<tcp_connection>> snapshot(connections_.begin(), connections_.end());
+    const std::vector snapshot(connections_.begin(), connections_.end());
     for (auto& connection : snapshot) {
         connection->close();
         connections_.erase(connection);
@@ -35,7 +35,9 @@ void connection_pool::disconnect(const std::shared_ptr<tcp_connection>& connecti
 void connection_pool::fanout_data(const std::string& data, const std::shared_ptr<tcp_connection>& invoker) const {
     for (const auto& connection : connections_) {
         if (connection == invoker) continue;
-        connection->handle_write(data);
+
+        auto message = clip_message::create(data);
+        connection->handle_write(message);
     }
 }
 

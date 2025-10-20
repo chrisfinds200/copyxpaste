@@ -22,3 +22,8 @@ target_include_directories(copyxpaste PRIVATE
 )
 
 target_link_libraries(copyxpaste clip)
+
+if (WIN32)
+    add_definitions(-D_WIN32_WINNT=0x00601)
+    target_link_libraries(${PROJECT_NAME} ws2_32 mswsock)
+endif ()

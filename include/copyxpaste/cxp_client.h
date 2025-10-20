@@ -6,6 +6,9 @@
 #define COPYXPASTE_CXP_CLIENT_H
 #include <asio/ip/tcp.hpp>
 #include <utility>
+#include <deque>
+
+#include "clip_message.hpp"
 
 class cxp_client : public std::enable_shared_from_this<cxp_client> {
 public:
@@ -24,13 +27,14 @@ private:
     asio::ip::tcp::socket socket_;
     asio::steady_timer poll_;
     std::string clipboard_;
-    std::array<char, 4096> readbuf_;
+    clip_message readbuf_;
     std::string host_;
     std::deque<std::shared_ptr<const std::string>> write_q_;
 
     int port_;
 
     void read_data();
+    void read_body();
     void send_data();
     void do_send();
     void start_poll();
