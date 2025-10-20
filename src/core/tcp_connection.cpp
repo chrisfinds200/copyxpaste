@@ -52,9 +52,19 @@ void tcp_connection::handle_read_body() {
                 return;
             }
 
-            std::cout << "bytes received: " << bytes_transferred << std::endl;
+            std::cout << "bytes received: " << bytes_transferred + 4 << std::endl;
+
+            // Update clipboard to avoid sending duplicate
+            this->connection_pool_.set_clipboard_(self->readbuf_.data());
+
+            // Update clipboard, this is going to trigger poll hence we need to update clipboard_ before
             cxp_engine::set_clipboard(self->readbuf_.data());
+
+            // Finally, broadcast clipboard
             self->connection_pool_.fanout_data(self->readbuf_.data(), self);
+
+            // Clear buffer
+            self->readbuf_.clear();
 
             // Re-arm read
             handle_read();

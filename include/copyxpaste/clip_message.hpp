@@ -70,6 +70,11 @@ public:
         std::memcpy(data_, header, header_length);
     }
 
+    void clear() {
+        this->body_length_ = 0;
+        std::memset(data_, 0, sizeof(data_));
+    }
+
 private:
     char data_[header_length + max_body_length];
     std::size_t body_length_;

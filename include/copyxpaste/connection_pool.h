@@ -21,6 +21,7 @@ public:
     void fanout_data(const std::string& data, const std::shared_ptr<tcp_connection>& invoker) const;
     void poll_clipboard();
     void stop_poll_clipboard();
+    void set_clipboard_(const std::string& data) {clipboard_ = data;}
     std::set<std::shared_ptr<tcp_connection>>& get_connections() {return connections_;}
 
 private:

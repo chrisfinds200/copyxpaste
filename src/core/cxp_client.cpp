@@ -94,13 +94,16 @@ void cxp_client::read_body() {
                 return;
             }
 
+            std::cout << "bytes received: " << bytes_transferred << std::endl;
+
+            // Update clipboard_
+            this->clipboard_ = readbuf_.body();
+
             // Set clipboard
             cxp_engine::set_clipboard(readbuf_.data());
-            std::cout << "bytes received: " << bytes_transferred << std::endl;
-            std::cout.flush();
 
             // Flush read buffer
-            // this->readbuf_ = {};
+            this->readbuf_.clear();
 
             // Re-arm read
             this->read_data();
