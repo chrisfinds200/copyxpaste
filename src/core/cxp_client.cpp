@@ -80,7 +80,7 @@ void cxp_client::read_data() {
             }
 
             if (readbuf_.decode_header()) {
-                self->read_body();
+                this->read_body();
             }
         });
 }
@@ -100,10 +100,10 @@ void cxp_client::read_body() {
             std::cout.flush();
 
             // Flush read buffer
-            this->readbuf_ = {};
+            // this->readbuf_ = {};
 
             // Re-arm read
-            self->read_data();
+            this->read_data();
         });
 }
 
@@ -116,7 +116,7 @@ void cxp_client::start_poll() {
 
         if (!clip.empty() && clip != clipboard_) {
             clipboard_ = clip;
-            send_data();
+            send_data(clipboard_);
         }
 
         // re-arm timer
@@ -124,10 +124,10 @@ void cxp_client::start_poll() {
     });
 }
 
-void cxp_client::send_data() {
+void cxp_client::send_data(std::string& clip) {
     auto self = shared_from_this();
     const bool idle = write_q_.empty();
-    auto payload = std::make_shared<std::string>(self->clipboard_);
+    auto payload = clip_message::create(clip);
     write_q_.push_back(std::move(payload));
     if (idle) {
         do_send();
@@ -136,7 +136,8 @@ void cxp_client::send_data() {
 
 void cxp_client::do_send() {
     auto self = shared_from_this();
-    asio::async_write(socket_, asio::buffer(*write_q_.front()), [self](const std::error_code& ec, std::size_t bytes_transferred) {
+    asio::async_write(socket_, asio::buffer(write_q_.front()->data(), write_q_.front()->length()),
+        [self](const std::error_code& ec, std::size_t bytes_transferred) {
         if (ec) {
             std::cerr << ec.message() << std::endl;
         }

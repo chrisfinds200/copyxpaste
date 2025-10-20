@@ -14,7 +14,7 @@ void cxp_server::run() {
     std::cout << "CopyXpaste Started!" << std::endl;
 
     std::thread server_thread([&]{
-        connection_pool_.poll_clipboard();
+        // connection_pool_.poll_clipboard();
         start_accept();
         io_context_.run();
     });
@@ -25,8 +25,6 @@ void cxp_server::run() {
             asio::post(io_context_, [&]{
                 this->stop();
             });
-
-
             break;
         }
     }

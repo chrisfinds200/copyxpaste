@@ -29,13 +29,13 @@ private:
     std::string clipboard_;
     clip_message readbuf_;
     std::string host_;
-    std::deque<std::shared_ptr<const std::string>> write_q_;
+    std::deque<std::shared_ptr<clip_message>> write_q_;
 
     int port_;
 
     void read_data();
     void read_body();
-    void send_data();
+    void send_data(std::string& clip);
     void do_send();
     void start_poll();
     explicit cxp_client(asio::io_context& io_context, std::string host, const int port)

@@ -38,7 +38,7 @@ void tcp_connection::handle_read() {
             }
 
             if (readbuf_.decode_header()) {
-                self->handle_read_body();
+                handle_read_body();
             }
         });
 }
@@ -46,17 +46,18 @@ void tcp_connection::handle_read() {
 void tcp_connection::handle_read_body() {
     auto self = shared_from_this();
     asio::async_read(socket_, asio::buffer(readbuf_.data(), readbuf_.body_length()),
-        [self](const std::error_code& ec, const std::size_t bytes_transferred) {
+        [self, this](const std::error_code& ec, const std::size_t bytes_transferred) {
             if (ec) {
                 std::cout << ec.message() << std::endl;
                 return;
             }
+
             std::cout << "bytes received: " << bytes_transferred << std::endl;
             cxp_engine::set_clipboard(self->readbuf_.data());
             self->connection_pool_.fanout_data(self->readbuf_.data(), self);
 
             // Re-arm read
-            self->handle_read();
+            handle_read();
         });
 }
 
@@ -73,7 +74,8 @@ void tcp_connection::handle_write(const std::shared_ptr<clip_message>& message) 
 void tcp_connection::do_write() {
     auto self = shared_from_this();
     const auto message = write_q_.front();
-    asio::async_write(socket_, asio::buffer(message->data(), message->length()), [self](const std::error_code& ec, const std::size_t bytes_transferred) {
+    asio::async_write(socket_, asio::buffer(message->data(), message->length()),
+        [self](const std::error_code& ec, const std::size_t bytes_transferred) {
         if (ec) {
             std::cerr << ec.message() << std::endl;
             return;
