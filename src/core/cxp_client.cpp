@@ -94,7 +94,8 @@ void cxp_client::read_body() {
                 return;
             }
 
-            std::cout << "bytes received: " << bytes_transferred << std::endl;
+            // Adding 4 due to header
+            std::cout << "bytes received: " << bytes_transferred + 4 << std::endl;
 
             // Update clipboard_
             this->clipboard_ = readbuf_.data();

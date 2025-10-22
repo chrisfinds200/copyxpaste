@@ -34,6 +34,7 @@ void tcp_connection::handle_read() {
         [self, this](const std::error_code& ec, const std::size_t bytes_transferred) {
             if (ec) {
                 std::cout << ec.message() << std::endl;
+                this->connection_pool_.disconnect(self);
                 return;
             }
 
@@ -49,6 +50,7 @@ void tcp_connection::handle_read_body() {
         [self, this](const std::error_code& ec, const std::size_t bytes_transferred) {
             if (ec) {
                 std::cout << ec.message() << std::endl;
+                this->connection_pool_.disconnect(self);
                 return;
             }
 
@@ -85,15 +87,17 @@ void tcp_connection::do_write() {
     auto self = shared_from_this();
     const auto message = write_q_.front();
     asio::async_write(socket_, asio::buffer(message->data(), message->length()),
-        [self](const std::error_code& ec, const std::size_t bytes_transferred) {
+        [this, self](const std::error_code& ec, const std::size_t bytes_transferred) {
         if (ec) {
             std::cerr << ec.message() << std::endl;
+            this->connection_pool_.disconnect(self);
             return;
         }
+
+        std::cout << "bytes transferred: " << bytes_transferred << std::endl;
         self->write_q_.pop_front();
         if (!self->write_q_.empty()) {
             self->do_write();
-            std::cout << "bytes transferred: " << bytes_transferred << std::endl;
         }
     });
 }

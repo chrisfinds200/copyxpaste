@@ -21,9 +21,16 @@ target_include_directories(copyxpaste PRIVATE
         ${CMAKE_SOURCE_DIR}/include/copyxpaste
 )
 
-target_link_libraries(copyxpaste clip)
+target_link_libraries(copyxpaste PRIVATE clip)
 
 if (WIN32)
-    add_definitions(-D_WIN32_WINNT=0x00601)
-    target_link_libraries(${PROJECT_NAME} ws2_32 mswsock)
+    target_compile_definitions(copyxpaste PRIVATE _WIN32_WINNT=0x0A00)
+
+    # Winsock libs for networking
+    target_link_libraries(copyxpaste PRIVATE ws2_32 mswsock)
+
+    if (MINGW)
+        # Avoid libgcc_s_seh-1.dll and libstdc++-6.dll
+        target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
 endif ()
