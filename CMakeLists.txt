@@ -30,7 +30,14 @@ if (WIN32)
     target_link_libraries(copyxpaste PRIVATE ws2_32 mswsock)
 
     if (MINGW)
-        # Avoid libgcc_s_seh-1.dll and libstdc++-6.dll
-        target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
+        message(STATUS "Configuring MinGW: static linking for all runtime libraries")
+
+        # Avoid libgcc_s_seh-1.dll, libstdc++-6.dll, and libwinpthread-1.dll
+        target_link_options(${PROJECT_NAME} PRIVATE
+                -static
+                -static-libgcc
+                -static-libstdc++
+                -pthread
+        )
     endif()
 endif ()
